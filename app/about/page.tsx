@@ -1,6 +1,7 @@
 'use client';
 
-import { Zap, TrendingUp, ScanLine, Share2, Rocket, Award, ChevronRight } from 'lucide-react';
+import { Zap, ScanLine, Share2, Rocket, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 import { APPNAME } from '@/lib/constants';
 
 export default function AboutPage() {
@@ -15,7 +16,8 @@ export default function AboutPage() {
           </h1>
           <p className="text-xl text-slate-500 max-w-3xl mx-auto font-medium leading-relaxed">
             {APPNAME} bridges the gap between physical products and viral digital content. We help
-            brands turn their customers into their biggest marketing asset.
+            brands turn their customers into their biggest marketing asset using next-generation AI
+            technology.
           </p>
         </div>
 
@@ -54,10 +56,13 @@ export default function AboutPage() {
             Ready to let your customers do the marketing for you? Join our platform to turn your
             brand viral, use {APPNAME} and dominate the market.
           </p>
-          <button className="px-8 py-4 rounded-2xl bg-lime-400 text-black font-black uppercase tracking-widest hover:bg-lime-300 transition-all group">
+          <Link
+            href="/login"
+            className="px-8 py-4 rounded-2xl bg-lime-400 text-black font-black uppercase tracking-widest hover:bg-lime-300 transition-all group"
+          >
             Explore the platform{' '}
             <ChevronRight className="inline ml-2 group-hover:translate-x-1 transition-transform" />
-          </button>
+          </Link>
         </div>
       </div>
     </div>
@@ -86,7 +91,7 @@ function AboutCard({
       <h3 className="text-xl font-black italic uppercase mb-4 text-white tracking-tight">
         {title}
       </h3>
-      <p className="text-slate-500 text-sm leading-relaxed font-medium group-hover:text-slate-400 transition-colors">
+      <p className="text-slate-300 text-sm leading-relaxed font-medium group-hover:text-slate-200 transition-colors">
         {description}
       </p>
       <div className="absolute bottom-0 right-0 w-8 h-8 bg-lime-400 translate-x-4 translate-y-4 rotate-45 opacity-0 group-hover:opacity-100 transition-all" />

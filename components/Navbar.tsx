@@ -108,7 +108,7 @@ export default function Navbar() {
               onClick={() => setIsMobileMenuOpen(false)}
               className="flex items-center justify-center w-full py-4 rounded-2xl bg-lime-400 text-black font-black uppercase tracking-widest text-sm shadow-[0_0_20px_rgba(163,230,53,0.2)]"
             >
-              Initialize Session
+              Login
             </Link>
           </div>
         )}

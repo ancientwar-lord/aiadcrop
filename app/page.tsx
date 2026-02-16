@@ -1,8 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Sparkles, Zap, ArrowRight, ScanLine, Share2, PlayCircle } from 'lucide-react';
-import { APPNAME } from '@/lib/constants';
+import { Sparkles, ArrowRight, ScanLine, Share2, PlayCircle, ArrowUpRight } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -40,9 +39,13 @@ export default function Home() {
             </Link>
             <Link
               href="/about"
-              className="px-10 py-5 rounded-2xl bg-white/5 border border-white/10 text-white font-bold uppercase tracking-wider text-sm hover:bg-white/10 transition-all backdrop-blur-sm"
+              className="px-10 py-5 rounded-2xl bg-white/10 border border-white/10 text-white font-bold uppercase tracking-wider text-sm hover:bg-white/20 transition-all backdrop-blur-sm"
             >
-              How it Works
+              How it Works{' '}
+              <ArrowUpRight
+                size={18}
+                className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"
+              />
             </Link>
           </div>
         </div>

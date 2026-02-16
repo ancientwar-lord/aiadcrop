@@ -80,7 +80,7 @@ export default function LoginPage() {
 
           <input
             type="email"
-            placeholder="Network ID (Email)"
+            placeholder="Email Id"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-5 py-4 bg-black/40 border border-white/5 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-lime-400 transition-all"
@@ -89,7 +89,7 @@ export default function LoginPage() {
 
           <input
             type="password"
-            placeholder="Access Key (Password)"
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-5 py-4 bg-black/40 border border-white/5 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-lime-400 transition-all"
