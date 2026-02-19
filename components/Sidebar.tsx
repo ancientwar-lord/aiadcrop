@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
 import { APPNAME } from '@/lib/constants';
-import { LayoutDashboard, Settings, ChevronLeft, LogIn, Zap } from 'lucide-react';
+import { LayoutDashboard, Settings, ChevronLeft, LogIn, Zap, Upload } from 'lucide-react';
 
 export default function Sidebar({
   isCollapsed = false,
@@ -17,7 +17,8 @@ export default function Sidebar({
   const { user, logOut } = useAuth();
 
   const links = [
-    { name: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard size={20} />, badge: '3' },
+    { name: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard size={20} />, badge: '0' },
+    { name: 'Upload Product', href: '/products/upload', icon: <Upload size={20} /> },
     { name: 'Settings', href: '/settings', icon: <Settings size={20} /> },
   ];
 

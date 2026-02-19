@@ -68,13 +68,11 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
 
   const logOut = async () => {
     await authClient.signOut();
-    router.push('/login'); // Fixed redirect logic from original signOut args
+    router.push('/');
   };
 
   return (
-    <AuthContext.Provider
-      value={{ user, loading, googleSignIn, logOut, emailSignIn, emailSignUp }}
-    >
+    <AuthContext.Provider value={{ user, loading, googleSignIn, logOut, emailSignIn, emailSignUp }}>
       {children}
     </AuthContext.Provider>
   );

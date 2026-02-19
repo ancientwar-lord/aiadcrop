@@ -11,7 +11,6 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
 
-  // Scroll effect for a "floating" navbar look
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
