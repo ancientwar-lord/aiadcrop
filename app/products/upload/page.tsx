@@ -181,7 +181,7 @@ export default function UploadProductPage() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-lime-50/70 via-white to-emerald-50/60 px-4 py-8 md:px-6 lg:px-8">
+    <div className="min-h-screen  px-4 py-8 md:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl space-y-8">
         <header className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm backdrop-blur md:p-8">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-lime-100 px-3 py-1 text-sm font-medium text-emerald-800">
@@ -294,7 +294,7 @@ export default function UploadProductPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-400"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-lime-600 to-emerald-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-lime-700 disabled:cursor-not-allowed disabled:bg-gray-400"
             >
               <Upload className="h-4 w-4" />
               {isLoading ? 'Uploading...' : 'Upload Product'}
@@ -348,7 +348,7 @@ export default function UploadProductPage() {
                 <button
                   onClick={generateQRCode}
                   disabled={isLoading}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-400"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-lime-600 to-emerald-500 px-6 py-3 text-sm font-semibold text-white transition hover:from-lime-700 hover:to-emerald-600 disabled:cursor-not-allowed disabled:bg-gray-400"
                 >
                   <QrCode className="h-4 w-4" />
                   {isLoading ? 'Generating QR Code...' : 'Generate QR Code'}
@@ -377,7 +377,7 @@ export default function UploadProductPage() {
                 />
                 <button
                   onClick={downloadQRCode}
-                  className="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                  className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-lime-600 to-emerald-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:from-lime-700 hover:to-emerald-600"
                 >
                   <Download className="h-4 w-4" />
                   Download QR Code
@@ -396,7 +396,7 @@ export default function UploadProductPage() {
                     />
                     <button
                       onClick={copyTryOnUrl}
-                      className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2.5 text-white transition hover:bg-emerald-700"
+                      className="inline-flex items-center justify-center rounded-xl bg-gradient-to-br from-lime-600 to-emerald-500 px-4 py-2.5 text-white transition hover:from-lime-700 hover:to-emerald-600"
                     >
                       <Copy className="h-4 w-4" />
                     </button>

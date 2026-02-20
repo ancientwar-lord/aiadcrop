@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {  Copy, Download, Loader, AlertCircle, CheckCircle, X, Zap } from 'lucide-react';
+import { Copy, Download, Loader, AlertCircle, CheckCircle, X, Zap } from 'lucide-react';
 import { useAuth } from '@/lib/context/AuthContext';
 
 interface Product {
@@ -51,7 +51,6 @@ export default function DashboardPage() {
       setIsLoadingProducts(false);
     }
   };
-
 
   const generateQRCode = async (product: Product) => {
     setError(null);
@@ -111,163 +110,159 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard</h1>
-      </div>
-
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5" />
-            {error}
+    <div className="min-h-screen px-4 py-8 md:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-8">
+        <header className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm backdrop-blur md:p-8">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-lime-100 px-3 py-1 text-sm font-medium text-emerald-800">
+            <Zap className="h-4 w-4" />
+            Dashboard
           </div>
-          <button onClick={() => setError(null)}>
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 md:text-4xl">
+            Your Products
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm text-gray-600 md:text-base">
+            Manage your uploaded products and generate try-on QR codes.
+          </p>
+        </header>
 
-      {success && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CheckCircle className="w-5 h-5" />
-            {success}
+        {error && (
+          <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+            <p className="flex-1">{error}</p>
+            <button onClick={() => setError(null)}>
+              <X className="w-4 h-4" />
+            </button>
           </div>
-          <button onClick={() => setSuccess(null)}>
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+        )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-        {/* Products List */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Your Products ({products.length})
-            </h2>
+        {success && (
+          <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            <CheckCircle className="mt-0.5 h-5 w-5 shrink-0" />
+            <p className="flex-1">{success}</p>
+            <button onClick={() => setSuccess(null)}>
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
-            {isLoadingProducts ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader className="w-8 h-8 animate-spin text-blue-600" />
-              </div>
-            ) : products.length === 0 ? (
-              <div className="text-center py-12">
-                <Zap className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">No products uploaded yet</p>
-                <p className="text-gray-400 text-sm">
-                  Upload your first product using the form on the left
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {products.map((product) => {
-                  const qr = productQRCodes[product.id];
-                  return (
-                    <div
-                      key={product.id}
-                      className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition"
-                    >
-                      <div className="flex gap-4">
-                        {/* Product Image */}
-                        <img
-                          src={product.cloudinary_url}
-                          alt={product.name}
-                          className="w-24 h-24 object-cover rounded-lg flex-shrink-0"
-                        />
+        <section className="rounded-2xl border border-lime-100 bg-white p-6 shadow-sm md:p-8">
+          <h2 className="mb-6 flex items-center gap-2 text-2xl font-semibold text-gray-900">
+            Products ({products.length})
+          </h2>
 
-                        {/* Product Info */}
-                        <div className="flex-1">
-                          <h3 className="font-bold text-gray-900">{product.name}</h3>
-                          <p className="text-sm text-gray-500 capitalize mb-2">
-                            {product.category}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            {new Date(product.uploaded_at).toLocaleDateString()}
-                          </p>
-                        </div>
+          {isLoadingProducts ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader className="w-8 h-8 animate-spin text-emerald-600" />
+            </div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-12">
+              <Zap className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500">No products uploaded yet</p>
+              <p className="text-gray-400 text-sm">
+                Upload your first product using the form on the left
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {products.map((product) => {
+                const qr = productQRCodes[product.id];
+                return (
+                  <div
+                    key={product.id}
+                    className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition"
+                  >
+                    <div className="flex gap-4">
+                      {/* Product Image */}
+                      <img
+                        src={product.cloudinary_url}
+                        alt={product.name}
+                        className="w-24 h-24 object-cover rounded-lg flex-shrink-0"
+                      />
 
-                        {/* QR Button */}
-                        {!qr ? (
-                          <button
-                            onClick={() => generateQRCode(product)}
-                            disabled={isLoading}
-                            className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition disabled:bg-gray-400 flex items-center gap-2 h-fit"
-                          >
-                            {isLoading ? (
-                              <Loader className="w-4 h-4 animate-spin" />
-                            ) : (
-                              'Generate QR'
-                            )}
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => closeQR(product.id)}
-                            className="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition h-fit"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        )}
+                      {/* Product Info */}
+                      <div className="flex-1">
+                        <h3 className="font-bold text-gray-900">{product.name}</h3>
+                        <p className="text-sm text-gray-500 capitalize mb-2">{product.category}</p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(product.uploaded_at).toLocaleDateString()}
+                        </p>
                       </div>
 
-                      {/* QR Code Display */}
-                      {qr && (
-                        <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-2 gap-4">
-                          <div className="flex flex-col items-center">
-                            <img
-                              src={qr.qrCode}
-                              alt="QR Code"
-                              className="w-40 h-40 border-2 border-gray-300 rounded-lg"
-                            />
-                            <button
-                              onClick={() => downloadQRCode(product.id)}
-                              className="mt-2 bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition flex items-center gap-2"
-                            >
-                              <Download className="w-4 h-4" />
-                              Download
-                            </button>
-                          </div>
-
-                          <div className="space-y-2">
-                            <div>
-                              <label className="block text-xs font-medium text-gray-700 mb-1">
-                                Try-On URL
-                              </label>
-                              <div className="flex gap-2">
-                                <input
-                                  type="text"
-                                  value={qr.tryOnUrl}
-                                  readOnly
-                                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-xs"
-                                />
-                                <button
-                                  onClick={() => copyTryOnUrl(product.id)}
-                                  className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition flex-shrink-0"
-                                >
-                                  <Copy className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </div>
-
-                            <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-700">
-                              <p className="font-medium mb-1">Ready to share:</p>
-                              <ul className="list-disc list-inside space-y-1 text-blue-600">
-                                <li>Print QR code</li>
-                                <li>Share URL directly</li>
-                                <li>Customers scan to try-on</li>
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
+                      {/* QR Button */}
+                      {!qr ? (
+                        <button
+                          onClick={() => generateQRCode(product)}
+                          disabled={isLoading}
+                          className="bg-gradient-to-br from-lime-600 to-emerald-500 text-white px-4 py-2 rounded-lg font-medium hover:from-lime-700 hover:to-emerald-600 transition disabled:bg-gray-400 flex items-center gap-2 h-fit"
+                        >
+                          {isLoading ? <Loader className="w-4 h-4 animate-spin" /> : 'Generate QR'}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => closeQR(product.id)}
+                          className="bg-rose-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-rose-600 transition h-fit"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
                       )}
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
+
+                    {/* QR Code Display */}
+                    {qr && (
+                      <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-2 gap-4">
+                        <div className="flex flex-col items-center">
+                          <img
+                            src={qr.qrCode}
+                            alt="QR Code"
+                            className="w-40 h-40 border-2 border-gray-300 rounded-lg"
+                          />
+                          <button
+                            onClick={() => downloadQRCode(product.id)}
+                            className="mt-2 bg-gradient-to-br from-lime-600 to-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-lime-700 hover:to-emerald-600 transition flex items-center gap-2"
+                          >
+                            <Download className="w-4 h-4" />
+                            Download
+                          </button>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">
+                              Try-On URL
+                            </label>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={qr.tryOnUrl}
+                                readOnly
+                                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-xs"
+                              />
+                              <button
+                                onClick={() => copyTryOnUrl(product.id)}
+                                className="bg-gradient-to-br from-lime-600 to-emerald-500 text-white px-3 py-2 rounded-lg hover:from-lime-700 hover:to-emerald-600 transition flex-shrink-0"
+                              >
+                                <Copy className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="bg-emerald-50 p-3 rounded-lg text-xs text-emerald-800 border border-emerald-100">
+                            <p className="font-medium mb-1">Ready to share:</p>
+                            <ul className="list-disc list-inside space-y-1 text-emerald-700">
+                              <li>Print QR code</li>
+                              <li>Share URL directly</li>
+                              <li>Customers scan to try-on</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );

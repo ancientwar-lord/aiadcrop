@@ -14,8 +14,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`antialiased bg-slate-50 text-slate-900`}>
-        <ClientLayout>{children}</ClientLayout>
+      <body
+        className={`antialiased text-slate-900 relative min-h-screen`}
+        style={{
+          backgroundImage: 'url(/bg.png)',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: 'cover',
+          backgroundAttachment: 'fixed',
+          backgroundColor: '#0f172a',
+        }}
+      >
+        <div className="fixed inset-0 z-0 pointer-events-none bg-black/30" />
+        <div className="relative z-10">
+          <ClientLayout>{children}</ClientLayout>
+        </div>
       </body>
     </html>
   );

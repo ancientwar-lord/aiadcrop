@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
@@ -21,11 +22,14 @@ export default function ClientLayout({
 function LayoutContent({ children }: { children: React.ReactNode }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const { user } = useAuth();
+  const pathname = usePathname();
+
+  const isTryOnPage = pathname?.startsWith("/tryon");
 
   return (
     <>
-      {!user && <Navbar />}
-      {user && (
+      {!user && !isTryOnPage && <Navbar />}
+      {user && !isTryOnPage && (
         <Sidebar
           isCollapsed={isSidebarCollapsed}
           toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
@@ -33,12 +37,12 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
       )}
       <main
         className={`min-h-screen transition-all duration-300 ${
-          !user ? "" : ""
-        } ${user ? (isSidebarCollapsed ? "md:pl-20" : "md:pl-64") : ""}`}
+          !user || isTryOnPage ? "" : ""
+        } ${user && !isTryOnPage ? (isSidebarCollapsed ? "md:pl-20" : "md:pl-64") : ""}`}
       >
         {children}
       </main>
-      {!user && <Footer />}
+      {!user && !isTryOnPage && <Footer />}
     </>
   );
 }
