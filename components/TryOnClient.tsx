@@ -50,6 +50,7 @@ export default function TryOnClient({ product }: ClientProps) {
   const [pollingCount, setPollingCount] = useState(0);
   const [skinToneAnalysis, setSkinToneAnalysis] = useState<SkinToneAnalysis | null>(null);
   const [recommendedProducts, setRecommendedProducts] = useState<RecommendedProduct[]>([]);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const needsGenderInput = ['ai_bag', 'ai_scarf', 'ai_shoes', 'ai_hat'].includes(product.category);
 
@@ -233,6 +234,96 @@ export default function TryOnClient({ product }: ClientProps) {
     }
   };
 
+  const downloadResultWithQR = async () => {
+    if (!resultImage) return;
+
+    setIsDownloading(true);
+    setError(null);
+
+    const loadImg = (src: string) => {
+      return new Promise<HTMLImageElement>((resolve, reject) => {
+        const img = new window.Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+    };
+
+    try {
+      const response = await fetch('/api/products/qrcode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: product.id,
+          baseUrl: process.env.NEXT_PUBLIC_BASE_URL || window.location.origin,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate QR code for download');
+      }
+
+      const qrData = await response.json();
+      const tryOnUrl = qrData.tryOnUrl || window.location.href;
+      const qrCodeUrl = qrData.qrCode;
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Failed to prepare image canvas');
+
+      const resultImg = await loadImg(resultImage);
+      const qrImg = await loadImg(qrCodeUrl);
+
+      canvas.width = resultImg.width;
+      canvas.height = resultImg.height;
+
+      ctx.drawImage(resultImg, 0, 0);
+
+      const gradient = ctx.createLinearGradient(0, canvas.height * 0.68, 0, canvas.height);
+      gradient.addColorStop(0, 'rgba(0,0,0,0)');
+      gradient.addColorStop(1, 'rgba(0,0,0,0.75)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, canvas.height * 0.68, canvas.width, canvas.height * 0.32);
+
+      const qrSize = canvas.width * 0.2;
+      const padding = canvas.width * 0.05;
+      const qrX = canvas.width - qrSize - padding;
+      const qrY = canvas.height - qrSize - padding;
+
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.roundRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20, 10);
+      ctx.fill();
+
+      ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+
+      ctx.fillStyle = 'white';
+      ctx.font = `bold ${Math.max(22, canvas.width * 0.032)}px sans-serif`;
+      ctx.textAlign = 'left';
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = 4;
+      ctx.fillText('Try this on you', padding, qrY + qrSize * 0.45);
+
+      const maxUrlWidth = canvas.width - qrSize - padding * 3;
+      ctx.font = `${Math.max(14, canvas.width * 0.018)}px sans-serif`;
+      const trimmedUrl =
+        ctx.measureText(tryOnUrl).width > maxUrlWidth ? `${tryOnUrl.slice(0, 55)}...` : tryOnUrl;
+      ctx.fillText(trimmedUrl, padding, qrY + qrSize * 0.72);
+
+      const link = document.createElement('a');
+      link.download = `tryon-result-${product.id}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (err) {
+      console.error('Failed to download try-on with QR', err);
+      setError(err instanceof Error ? err.message : 'Failed to download image with QR');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   // --- UI RENDER ---
   return (
     <div className="min-h-screen bg-linear-to-br from-purple-50 to-pink-100 p-4 md:p-8">
@@ -402,13 +493,13 @@ export default function TryOnClient({ product }: ClientProps) {
             </div>
 
             <div className="p-6 bg-gray-50 border-t flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href={resultImage}
-                download="my-tryon.jpg"
-                className="flex-1 max-w-xs bg-gray-900 text-white py-3 px-6 rounded-lg font-medium text-center hover:bg-gray-800 transition"
+              <button
+                onClick={downloadResultWithQR}
+                disabled={isDownloading}
+                className="flex-1 max-w-xs bg-gray-900 text-white py-3 px-6 rounded-lg font-medium text-center hover:bg-gray-800 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                Download Image
-              </a>
+                {isDownloading ? 'Preparing download...' : 'Download Image'}
+              </button>
               <button
                 onClick={shareResult}
                 className="flex-1 max-w-xs bg-purple-100 text-purple-700 py-3 px-6 rounded-lg font-medium hover:bg-purple-200 transition flex items-center justify-center gap-2"
