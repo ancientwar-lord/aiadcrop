@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
+import {
+  buildYouCamTaskPayload,
+  getYouCamTaskEndpoint,
+  resolveTryOnCategory,
+} from '@/lib/tryon-config';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { userFileId, productImageUrl, garmentCategory } = body;
+    const { userFileId, productImageUrl, productCategory, gender } = body;
 
     if (!userFileId || !productImageUrl) {
       console.error('Missing fields:', { userFileId, productImageUrl });
@@ -14,18 +19,23 @@ export async function POST(request: Request) {
     }
 
     const apiKey = process.env.YOUCAM_API_KEY;
+    const resolvedCategory = resolveTryOnCategory(productCategory);
+    const taskEndpoint = getYouCamTaskEndpoint(resolvedCategory.mode);
+    const payload = buildYouCamTaskPayload({
+      mode: resolvedCategory.mode,
+      userFileId,
+      productImageUrl,
+      garmentCategory: resolvedCategory.garmentCategory,
+      gender,
+    });
 
-    const response = await fetch('https://yce-api-01.makeupar.com/s2s/v2.0/task/cloth', {
+    const response = await fetch(`https://yce-api-01.makeupar.com${taskEndpoint}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        src_file_id: userFileId,
-        ref_file_url: productImageUrl,
-        garment_category: garmentCategory || 'auto',
-      }),
+      body: JSON.stringify(payload),
     });
 
     const data = await response.json();

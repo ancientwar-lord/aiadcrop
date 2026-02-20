@@ -1,14 +1,6 @@
-/**
- * Perfect Corp (YouCam) S2S v2.0 Integration
- * Location: lib/perfectCorp.ts
- */
-
 const API_BASE_URL = 'https://yce-api-01.makeupar.com';
 const API_KEY = process.env.YOUCAM_API_KEY!;
-
-/* ============================= */
-/* ========= INTERFACES ======== */
-/* ============================= */
+import { getYouCamTaskEndpoint, resolveTryOnCategory } from '@/lib/tryon-config';
 
 export interface UploadResult {
   success: boolean;
@@ -25,15 +17,11 @@ export interface TaskResult {
 
 export interface TaskStatusResult {
   success: boolean;
-  status: string; // 'success' | 'running' | 'failed'
-  result?: string; // Image URL
+  status: string;
+  result?: string;
   error?: string;
 }
 
-/* ============================= */
-/* ===== Upload File (S2S) ===== */
-/* ============================= */
-// (Ye function tumhara pehle se sahi tha, same rakha hai)
 export async function uploadFileToYouCam(params: {
   fileUrl?: string;
   fileBuffer?: Buffer;
@@ -74,7 +62,7 @@ export async function uploadFileToYouCam(params: {
     }
 
     const data = await response.json();
-    return { success: true, file_id: data.data?.file_id || data.file_id }; // Safe check
+    return { success: true, file_id: data.data?.file_id || data.file_id };
   } catch (error) {
     return {
       success: false,
@@ -83,10 +71,6 @@ export async function uploadFileToYouCam(params: {
   }
 }
 
-/* ============================= */
-/* ===== Create Cloth Task ===== */
-/* ============================= */
-// (Ye bhi same hai, bas typing thodi safe ki hai)
 export async function createClothesTask(
   productFileId: string,
   userFileId: string,
@@ -97,8 +81,8 @@ export async function createClothesTask(
 ): Promise<TaskResult> {
   try {
     const payload = {
-      src_file_id: userFileId, // Documentation: src = User
-      ref_file_id: productFileId, // Documentation: ref = Product
+      src_file_id: userFileId,
+      ref_file_id: productFileId,
       garment_category: options.garment_category || 'tops',
     };
 
@@ -120,7 +104,7 @@ export async function createClothesTask(
     return {
       success: true,
       task_id: data.data.task_id,
-      polling_interval: 2000, // Default 2 seconds
+      polling_interval: 2000,
     };
   } catch (error) {
     return {
@@ -130,13 +114,15 @@ export async function createClothesTask(
   }
 }
 
-/* ============================= */
-/* === Get Task Status (NEW) === */
-/* ============================= */
-// 👇 YE FUNCTION MISSING THA
-export async function getTaskStatus(taskId: string): Promise<TaskStatusResult> {
+export async function getTaskStatus(
+  taskId: string,
+  productCategory?: string
+): Promise<TaskStatusResult> {
   try {
-    const response = await fetch(`${API_BASE_URL}/s2s/v2.0/task/cloth/${taskId}`, {
+    const { mode } = resolveTryOnCategory(productCategory);
+    const taskEndpoint = getYouCamTaskEndpoint(mode);
+
+    const response = await fetch(`${API_BASE_URL}${taskEndpoint}/${taskId}`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${API_KEY}`,
@@ -152,23 +138,21 @@ export async function getTaskStatus(taskId: string): Promise<TaskStatusResult> {
 
     const data = json.data;
 
-    // Documentation: task_status can be 'success', 'running' (or processing), 'failed'
     const status = data.task_status;
 
     if (status === 'success') {
       return {
         success: true,
         status: 'success',
-        result: data.results?.url, // Result Image URL yahan hoti hai
+        result: data.results?.url,
       };
     } else if (status === 'failed') {
       return {
-        success: true, // Request successful, but task failed
+        success: true,
         status: 'error',
         error: data.error || 'AI processing failed',
       };
     } else {
-      // Running / Processing
       return {
         success: true,
         status: 'processing',

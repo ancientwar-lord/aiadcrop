@@ -1,7 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { Upload, Copy, Download } from 'lucide-react';
+import Image from 'next/image';
+import {
+  Upload,
+  Copy,
+  Download,
+  Sparkles,
+  AlertCircle,
+  CheckCircle2,
+  QrCode,
+  Shirt,
+} from 'lucide-react';
 import { useAuth } from '@/lib/context/AuthContext';
 
 interface Product {
@@ -19,11 +29,14 @@ interface QRCode {
 
 // ✅ Valid Categories List (YouCam Supported)
 const CATEGORIES = [
-  { value: 'upper_body', label: 'Upper Body (Tops, Shirts, Jackets)' },
-  { value: 'lower_body', label: 'Lower Body (Pants, Skirts, Jeans)' },
-  { value: 'full_body', label: 'Full Body (Dresses, Suits, Coats)' },
-  { value: 'shoes', label: 'Shoes' },
-  { value: 'auto', label: 'Auto Detect (Not confirm)' },
+  { value: 'cloth_upper_body', label: 'Clothes · Upper Body (Top, Shirt, Jacket)' },
+  { value: 'cloth_lower_body', label: 'Clothes · Lower Body (Jeans, Pants, Skirt)' },
+  { value: 'cloth_full_body', label: 'Clothes · Full Body (Dress, Jumpsuit, Set)' },
+  { value: 'cloth_auto', label: 'Clothes · Auto Detect' },
+  { value: 'ai_bag', label: 'Bag' },
+  { value: 'ai_scarf', label: 'Scarf' },
+  { value: 'ai_shoes', label: 'Shoes' },
+  { value: 'ai_hat', label: 'Hat' },
 ];
 
 export default function UploadProductPage() {
@@ -31,12 +44,14 @@ export default function UploadProductPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [product, setProduct] = useState<Product | null>(null);
   const [qrCode, setQrCode] = useState<QRCode | null>(null);
+  const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
+  const [selectedImageName, setSelectedImageName] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     productName: '',
-    category: 'auto',
+    category: 'cloth_auto',
   });
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -44,8 +59,25 @@ export default function UploadProductPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file) {
+      setSelectedImagePreview(null);
+      setSelectedImageName('');
+      return;
+    }
+
+    setSelectedImageName(file.name);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setSelectedImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleFileUpload = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); 
+    e.preventDefault();
     setError(null);
     setSuccess(null);
     setIsLoading(true);
@@ -69,7 +101,7 @@ export default function UploadProductPage() {
       const uploadFormData = new FormData();
       uploadFormData.append('image', imageFile);
       uploadFormData.append('productName', formData.productName);
-      uploadFormData.append('category', formData.category); // ✅ Ab sahi value jayegi (e.g., 'upper_body')
+      uploadFormData.append('category', formData.category);
       uploadFormData.append('sellerId', user.uid);
 
       const uploadResponse = await fetch('/api/products/upload', {
@@ -85,8 +117,10 @@ export default function UploadProductPage() {
       const uploadData = await uploadResponse.json();
       setProduct(uploadData.product);
       setSuccess('Product uploaded successfully! Now generate a QR code.');
+      setSelectedImagePreview(null);
+      setSelectedImageName('');
       // Form reset
-      setFormData({ productName: '', category: 'upper_body' });
+      setFormData({ productName: '', category: 'cloth_auto' });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to upload product');
     } finally {
@@ -147,82 +181,112 @@ export default function UploadProductPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">AI Clothes Try-On</h1>
-        <p className="text-gray-600 mb-8">
-          Upload your product and generate a QR code for customers to try it on
-        </p>
+    <div className="min-h-screen bg-linear-to-b from-lime-50/70 via-white to-emerald-50/60 px-4 py-8 md:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl space-y-8">
+        <header className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm backdrop-blur md:p-8">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-lime-100 px-3 py-1 text-sm font-medium text-emerald-800">
+            <Sparkles className="h-4 w-4" />
+            Seller Studio
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 md:text-4xl">
+            Upload product and generate try-on QR
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm text-gray-600 md:text-base">
+            Add your product image once, generate a QR instantly, and share the experience with
+            customers in store or online.
+          </p>
+        </header>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-            {error}
+          <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+            <p>{error}</p>
           </div>
         )}
 
         {success && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
-            {success}
+          <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
+            <p>{success}</p>
           </div>
         )}
 
-        {/* Upload Product Section */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <Upload className="w-6 h-6" />
-            Step 1: Upload Product Image
+        <section className="rounded-2xl border border-lime-100 bg-white p-6 shadow-sm md:p-8">
+          <h2 className="mb-6 flex items-center gap-2 text-2xl font-semibold text-gray-900">
+            <Upload className="h-6 w-6 text-emerald-600" />
+            Step 1 · Upload Product
           </h2>
 
-          <form onSubmit={handleFileUpload} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
-              <input
-                type="text"
-                name="productName"
-                value={formData.productName}
-                onChange={handleFormChange}
-                placeholder="e.g., Red Summer Dress"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
+          <form onSubmit={handleFileUpload} className="space-y-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Product Name</label>
+                <input
+                  type="text"
+                  name="productName"
+                  value={formData.productName}
+                  onChange={handleFormChange}
+                  placeholder="e.g., Red Summer Dress"
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Try-On Category</label>
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleFormChange}
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                >
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500">
+                  This selection controls which YouCam endpoint QR try-on will use.
+                </p>
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Garment Category
-              </label>
-              {/* ✅ UPDATED DROPDOWN */}
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleFormChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
-              <p className="mt-1 text-xs text-gray-500">
-                Select the correct category for best AI results.
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 transition">
+              <label className="mb-2 block text-sm font-medium text-gray-700">Product Image</label>
+              <div className="rounded-2xl border-2 border-dashed border-emerald-200 bg-emerald-50/50 p-8 text-center transition hover:border-emerald-400 hover:bg-emerald-50">
                 <input
                   type="file"
                   name="image"
                   accept="image/*"
                   className="hidden"
                   id="imageInput"
+                  onChange={handleImageChange}
                 />
-                <label htmlFor="imageInput" className="cursor-pointer">
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600 font-medium">Click to upload or drag and drop</p>
-                  <p className="text-gray-400 text-sm">PNG, JPG, GIF up to 10MB</p>
+                <label htmlFor="imageInput" className="block cursor-pointer">
+                  {selectedImagePreview ? (
+                    <div className="space-y-3">
+                      <div className="relative mx-auto h-56 max-w-md overflow-hidden rounded-xl border border-emerald-200 bg-white">
+                        <Image
+                          src={selectedImagePreview}
+                          alt="Selected product"
+                          fill
+                          className="object-contain"
+                          unoptimized
+                        />
+                      </div>
+                      <p className="text-sm font-medium text-emerald-700">{selectedImageName}</p>
+                      <p className="text-xs text-gray-500">Click to change image</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white text-emerald-600 shadow-sm">
+                        <Upload className="h-6 w-6" />
+                      </div>
+                      <p className="font-medium text-gray-800">Click to upload or drag and drop</p>
+                      <p className="mt-1 text-sm text-gray-500">PNG, JPG, GIF · up to 10MB</p>
+                    </>
+                  )}
                 </label>
               </div>
             </div>
@@ -230,103 +294,127 @@ export default function UploadProductPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition disabled:bg-gray-400"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-400"
             >
+              <Upload className="h-4 w-4" />
               {isLoading ? 'Uploading...' : 'Upload Product'}
             </button>
           </form>
-        </div>
+        </section>
 
-        {/* Product Preview Section */}
         {product && (
-          <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Product Details</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <img
+          <section className="rounded-2xl border border-lime-100 bg-white p-6 shadow-sm md:p-8">
+            <h2 className="mb-6 flex items-center gap-2 text-2xl font-semibold text-gray-900">
+              <Shirt className="h-6 w-6 text-emerald-600" />
+              Step 2 · Product Preview
+            </h2>
+
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+              <div className="relative h-72 w-full overflow-hidden rounded-2xl border border-gray-200">
+                <Image
                   src={product.cloudinaryUrl}
                   alt={product.name}
-                  className="w-full h-64 object-cover rounded-lg"
+                  fill
+                  className="object-cover"
+                  unoptimized
                 />
               </div>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-gray-500 text-sm">Product Name</p>
-                  <p className="text-gray-900 font-bold">{product.name}</p>
+
+              <div className="space-y-5">
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    Product Name
+                  </p>
+                  <p className="mt-1 font-semibold text-gray-900">{product.name}</p>
                 </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Category</p>
-                  {/* Display user-friendly label if possible */}
-                  <p className="text-gray-900 font-bold capitalize">
+
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    Category
+                  </p>
+                  <p className="mt-1 font-semibold text-gray-900">
                     {CATEGORIES.find((c) => c.value === product.category)?.label ||
                       product.category}
                   </p>
                 </div>
-                <div>
-                  <p className="text-gray-500 text-sm">Product ID</p>
-                  <p className="text-gray-900 font-mono text-sm break-all">{product.id}</p>
+
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                  <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                    Product ID
+                  </p>
+                  <p className="mt-1 break-all font-mono text-sm text-gray-800">{product.id}</p>
                 </div>
+
                 <button
                   onClick={generateQRCode}
                   disabled={isLoading}
-                  className="w-full bg-indigo-600 text-white py-2 rounded-lg font-medium hover:bg-indigo-700 transition disabled:bg-gray-400"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-400"
                 >
+                  <QrCode className="h-4 w-4" />
                   {isLoading ? 'Generating QR Code...' : 'Generate QR Code'}
                 </button>
               </div>
             </div>
-          </div>
+          </section>
         )}
 
-        {/* QR Code Section */}
         {qrCode && (
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">QR Code Generated</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="flex flex-col items-center">
-                <img
+          <section className="rounded-2xl border border-lime-100 bg-white p-6 shadow-sm md:p-8">
+            <h2 className="mb-6 flex items-center gap-2 text-2xl font-semibold text-gray-900">
+              <QrCode className="h-6 w-6 text-emerald-600" />
+              Step 3 · QR Ready
+            </h2>
+
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+              <div className="flex flex-col items-center rounded-2xl border border-gray-200 bg-gray-50 p-6">
+                <Image
                   src={qrCode.qrCode}
                   alt="QR Code"
-                  className="w-64 h-64 border-4 border-gray-300 rounded-lg"
+                  width={256}
+                  height={256}
+                  className="h-64 w-64 rounded-xl border-4 border-white shadow"
+                  unoptimized
                 />
                 <button
                   onClick={downloadQRCode}
-                  className="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-700 transition flex items-center gap-2"
+                  className="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
                 >
-                  <Download className="w-4 h-4" />
+                  <Download className="h-4 w-4" />
                   Download QR Code
                 </button>
               </div>
+
               <div className="space-y-4">
                 <div>
-                  <p className="text-gray-500 text-sm mb-2">Try-On URL</p>
+                  <p className="mb-2 text-sm font-medium text-gray-700">Try-On URL</p>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={qrCode.tryOnUrl}
                       readOnly
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
+                      className="flex-1 rounded-xl border border-gray-300 bg-gray-50 px-4 py-2.5 text-sm text-gray-700"
                     />
                     <button
                       onClick={copyTryOnUrl}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                      className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2.5 text-white transition hover:bg-emerald-700"
                     >
-                      <Copy className="w-4 h-4" />
+                      <Copy className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
-                <div className="bg-blue-50 p-4 rounded-lg text-sm text-gray-700">
-                  <p className="font-medium mb-2">Instructions:</p>
-                  <ul className="list-disc list-inside space-y-1">
+
+                <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-900">
+                  <p className="mb-2 font-semibold">How to use</p>
+                  <ul className="list-disc space-y-1 pl-5 text-emerald-800">
                     <li>Print or display the QR code</li>
-                    <li>Customers scan to access try-on feature</li>
-                    <li>Share the URL directly with customers</li>
-                    <li>Users upload their photo to try on the product</li>
+                    <li>Customers scan to open try-on</li>
+                    <li>Share URL directly in chat or social</li>
+                    <li>Customers upload photo and preview fit</li>
                   </ul>
                 </div>
               </div>
             </div>
-          </div>
+          </section>
         )}
       </div>
     </div>

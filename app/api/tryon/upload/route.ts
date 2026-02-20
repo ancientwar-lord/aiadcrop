@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
+import { getYouCamFileEndpoint, resolveTryOnCategory } from '@/lib/tryon-config';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { fileName, fileType, fileSize } = body;
+    const { fileName, fileType, fileSize, productCategory } = body;
 
     if (!fileName || !fileType || !fileSize) {
       return NextResponse.json(
@@ -11,8 +12,11 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+    const { mode } = resolveTryOnCategory(productCategory);
+    const fileEndpoint = getYouCamFileEndpoint(mode);
+
     const apikey = process.env.YOUCAM_API_KEY;
-    const response = await fetch('https://yce-api-01.makeupar.com/s2s/v2.0/file/cloth', {
+    const response = await fetch(`https://yce-api-01.makeupar.com${fileEndpoint}`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apikey}`,

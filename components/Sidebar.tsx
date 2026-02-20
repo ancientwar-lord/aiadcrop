@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
 import { APPNAME } from '@/lib/constants';
-import { LayoutDashboard, Settings, ChevronLeft, LogIn, Zap, Upload } from 'lucide-react';
+import { LayoutDashboard, ChevronLeft, LogIn, Zap, Upload, Frame } from 'lucide-react';
 
 export default function Sidebar({
   isCollapsed = false,
@@ -17,9 +17,9 @@ export default function Sidebar({
   const { user, logOut } = useAuth();
 
   const links = [
-    { name: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard size={20} />, badge: '0' },
-    { name: 'Upload Product', href: '/products/upload', icon: <Upload size={20} /> },
-    { name: 'Settings', href: '/settings', icon: <Settings size={20} /> },
+    { name: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard size={20} /> },
+    { name: 'Upload', href: '/products/upload', icon: <Upload size={20} /> },
+    { name: 'Seller Studio', href: '/studio', icon: <Frame size={20} /> },
   ];
 
   return (
@@ -90,12 +90,6 @@ export default function Sidebar({
 
                 {!isCollapsed && (
                   <span className="ml-3 font-semibold text-sm tracking-wide">{link.name}</span>
-                )}
-
-                {!isCollapsed && link.badge && (
-                  <span className="ml-auto bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
-                    {link.badge}
-                  </span>
                 )}
               </Link>
             );

@@ -27,11 +27,14 @@ export default function TryOnClient({ product }: ClientProps) {
   const [step, setStep] = useState<'upload' | 'processing' | 'results'>('upload');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [gender, setGender] = useState<'female' | 'male'>('female');
 
   const [userImage, setUserImage] = useState<File | null>(null);
   const [userImagePreview, setUserImagePreview] = useState<string | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [pollingCount, setPollingCount] = useState(0);
+
+  const needsGenderInput = ['ai_bag', 'ai_scarf', 'ai_shoes', 'ai_hat'].includes(product.category);
 
   // --- Image Preview Handler ---
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,6 +68,7 @@ export default function TryOnClient({ product }: ClientProps) {
           fileName: userImage.name,
           fileType: userImage.type,
           fileSize: userImage.size,
+          productCategory: product.category,
         }),
       });
 
@@ -91,7 +95,8 @@ export default function TryOnClient({ product }: ClientProps) {
         body: JSON.stringify({
           userFileId: fileId,
           productImageUrl: product.cloudinaryUrl,
-          garmentCategory: product.category || 'tops',
+          productCategory: product.category,
+          gender,
         }),
       });
 
@@ -115,7 +120,11 @@ export default function TryOnClient({ product }: ClientProps) {
 
     const poll = async () => {
       try {
-        const res = await fetch(`/api/tryon/status?taskId=${id}`);
+        const params = new URLSearchParams({
+          taskId: id,
+          productCategory: product.category,
+        });
+        const res = await fetch(`/api/tryon/status?${params.toString()}`);
         const data: TaskStatus = await res.json();
 
         setPollingCount((prev) => prev + 1);
@@ -169,7 +178,7 @@ export default function TryOnClient({ product }: ClientProps) {
 
   // --- UI RENDER ---
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 p-4 md:p-8">
+    <div className="min-h-screen bg-linear-to-br from-purple-50 to-pink-100 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         <Link
           href="/products"
@@ -196,7 +205,7 @@ export default function TryOnClient({ product }: ClientProps) {
             <div className="grid grid-cols-1 md:grid-cols-2">
               {/* Left: Product Info */}
               <div className="bg-gray-50 p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-gray-200">
-                <div className="relative w-full max-w-sm aspect-[3/4] rounded-lg overflow-hidden shadow-md">
+                <div className="relative aspect-3/4 w-full max-w-sm overflow-hidden rounded-lg shadow-md">
                   <img
                     src={product.cloudinaryUrl}
                     alt={product.name}
@@ -212,6 +221,20 @@ export default function TryOnClient({ product }: ClientProps) {
               {/* Right: Upload Area */}
               <div className="p-8 flex flex-col justify-center">
                 <h2 className="text-2xl font-bold mb-6 text-gray-800">Upload Your Photo</h2>
+
+                {needsGenderInput && (
+                  <div className="mb-4">
+                    <label className="mb-2 block text-sm font-medium text-gray-700">Gender</label>
+                    <select
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value as 'female' | 'male')}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-200"
+                    >
+                      <option value="female">Female</option>
+                      <option value="male">Male</option>
+                    </select>
+                  </div>
+                )}
 
                 {!userImagePreview ? (
                   <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-purple-300 border-dashed rounded-lg cursor-pointer bg-purple-50 hover:bg-purple-100 transition duration-300">
@@ -255,7 +278,7 @@ export default function TryOnClient({ product }: ClientProps) {
                   onClick={uploadAndProcess}
                   disabled={!userImage || isLoading}
                   className={`mt-6 w-full py-4 px-6 rounded-lg font-bold text-white text-lg shadow-lg transform transition hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2
-                            ${!userImage || isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'}
+                            ${!userImage || isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'}
                         `}
                 >
                   {isLoading ? (

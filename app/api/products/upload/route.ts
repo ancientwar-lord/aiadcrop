@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import { uploadToCloudinary } from '@/lib/cloudinary-client';
 import { createProduct } from '@/lib/products-db';
+import { analyzeProductWithPollinations } from '@/lib/product-vision';
 
 async function ensureTable() {
   await pool.query(`
@@ -12,11 +13,24 @@ async function ensureTable() {
       category VARCHAR(50) NOT NULL,
       cloudinary_url TEXT NOT NULL,
       cloudinary_public_id VARCHAR(255),
+      color VARCHAR(100) DEFAULT 'Unknown',
+      style VARCHAR(100) DEFAULT 'General',
+      best_skin_tones TEXT[] DEFAULT ARRAY[]::TEXT[],
       uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       created_by VARCHAR(255),
       CONSTRAINT fk_seller FOREIGN KEY (seller_id) REFERENCES "user"(id) ON DELETE CASCADE
     );
   `);
+
+  await pool.query(
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS color VARCHAR(100) DEFAULT 'Unknown';`
+  );
+  await pool.query(
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS style VARCHAR(100) DEFAULT 'General';`
+  );
+  await pool.query(
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS best_skin_tones TEXT[] DEFAULT ARRAY[]::TEXT[];`
+  );
 }
 
 async function ensureUserExists(userId: string) {
@@ -70,6 +84,12 @@ export async function POST(request: NextRequest) {
     // Ensure user exists in users table before creating product
     await ensureUserExists(sellerId);
 
+    const visionMetadata = await analyzeProductWithPollinations({
+      imageUrl: uploadResult.secure_url,
+      productName,
+      category: productCategory,
+    });
+
     // Save to database
     const savedProduct = await createProduct(
       productId,
@@ -77,7 +97,8 @@ export async function POST(request: NextRequest) {
       productName,
       productCategory,
       uploadResult.secure_url,
-      uploadResult.public_id
+      uploadResult.public_id,
+      visionMetadata
     );
 
     return NextResponse.json(
@@ -89,6 +110,9 @@ export async function POST(request: NextRequest) {
           category: savedProduct.category,
           cloudinaryUrl: savedProduct.cloudinary_url,
           cloudinaryPublicId: savedProduct.cloudinary_public_id,
+          color: savedProduct.color,
+          style: savedProduct.style,
+          bestSkinTones: savedProduct.best_skin_tones || [],
           uploadedAt: savedProduct.uploaded_at,
         },
       },

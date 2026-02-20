@@ -9,13 +9,14 @@ import { getTaskStatus } from '@/lib/perfectCorp';
 export async function GET(request: NextRequest) {
   try {
     const taskId = request.nextUrl.searchParams.get('taskId');
+    const productCategory = request.nextUrl.searchParams.get('productCategory') || undefined;
 
     if (!taskId) {
       return NextResponse.json({ error: 'Task ID is required' }, { status: 400 });
     }
 
     // Library function call karo
-    const statusResult = await getTaskStatus(taskId);
+    const statusResult = await getTaskStatus(taskId, productCategory);
 
     // Agar API call hi fail ho gayi (Network error etc)
     if (!statusResult.success) {

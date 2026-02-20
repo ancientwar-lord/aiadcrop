@@ -15,11 +15,24 @@ export async function initializeDatabase() {
         category VARCHAR(50) NOT NULL,
         cloudinary_url TEXT NOT NULL,
         cloudinary_public_id VARCHAR(255),
+        color VARCHAR(100) DEFAULT 'Unknown',
+        style VARCHAR(100) DEFAULT 'General',
+        best_skin_tones TEXT[] DEFAULT ARRAY[]::TEXT[],
         uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         created_by VARCHAR(255),
         CONSTRAINT fk_seller FOREIGN KEY (seller_id) REFERENCES "user"(id) ON DELETE CASCADE
       );
     `);
+
+    await pool.query(
+      `ALTER TABLE products ADD COLUMN IF NOT EXISTS color VARCHAR(100) DEFAULT 'Unknown';`
+    );
+    await pool.query(
+      `ALTER TABLE products ADD COLUMN IF NOT EXISTS style VARCHAR(100) DEFAULT 'General';`
+    );
+    await pool.query(
+      `ALTER TABLE products ADD COLUMN IF NOT EXISTS best_skin_tones TEXT[] DEFAULT ARRAY[]::TEXT[];`
+    );
 
     console.log('✅ Products table created successfully');
   } catch (error) {
@@ -37,14 +50,39 @@ export async function createProduct(
   name: string,
   category: string,
   cloudinaryUrl: string,
-  cloudinaryPublicId: string
+  cloudinaryPublicId: string,
+  metadata?: {
+    color?: string;
+    style?: string;
+    bestSkinTones?: string[];
+  }
 ) {
   try {
     const result = await pool.query(
-      `INSERT INTO products (id, seller_id, name, category, cloudinary_url, cloudinary_public_id)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO products (
+         id,
+         seller_id,
+         name,
+         category,
+         cloudinary_url,
+         cloudinary_public_id,
+         color,
+         style,
+         best_skin_tones
+       )
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
-      [id, sellerId, name, category, cloudinaryUrl, cloudinaryPublicId]
+      [
+        id,
+        sellerId,
+        name,
+        category,
+        cloudinaryUrl,
+        cloudinaryPublicId,
+        metadata?.color || 'Unknown',
+        metadata?.style || 'General',
+        metadata?.bestSkinTones || [],
+      ]
     );
     return result.rows[0];
   } catch (error) {

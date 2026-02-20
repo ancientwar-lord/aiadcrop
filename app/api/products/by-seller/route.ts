@@ -16,11 +16,24 @@ async function ensureTable() {
       category VARCHAR(50) NOT NULL,
       cloudinary_url TEXT NOT NULL,
       cloudinary_public_id VARCHAR(255),
+      color VARCHAR(100) DEFAULT 'Unknown',
+      style VARCHAR(100) DEFAULT 'General',
+      best_skin_tones TEXT[] DEFAULT ARRAY[]::TEXT[],
       uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       created_by VARCHAR(255),
       CONSTRAINT fk_seller FOREIGN KEY (seller_id) REFERENCES "user"(id) ON DELETE CASCADE
     );
   `);
+
+  await pool.query(
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS color VARCHAR(100) DEFAULT 'Unknown';`
+  );
+  await pool.query(
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS style VARCHAR(100) DEFAULT 'General';`
+  );
+  await pool.query(
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS best_skin_tones TEXT[] DEFAULT ARRAY[]::TEXT[];`
+  );
 }
 
 async function ensureUserExists(userId: string) {
