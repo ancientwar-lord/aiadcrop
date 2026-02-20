@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import TryOnClient from '@/components/TryOnClient';
+import { getProductById } from '@/lib/products-db';
 
 interface ProductData {
   id: string;
@@ -10,21 +11,15 @@ interface ProductData {
 
 async function getProduct(id: string): Promise<ProductData | null> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const product = await getProductById(id);
 
-    const res = await fetch(`${baseUrl}/api/products/${id}`, {
-      cache: 'no-store',
-    });
-
-    if (!res.ok) return null;
-
-    const data = await res.json();
+    if (!product) return null;
 
     return {
-      id: data.product.id,
-      name: data.product.name,
-      cloudinaryUrl: data.product.cloudinaryUrl,
-      category: data.product.category,
+      id: product.id,
+      name: product.name,
+      cloudinaryUrl: product.cloudinary_url,
+      category: product.category,
     };
   } catch (error) {
     console.error('Error fetching product:', error);
