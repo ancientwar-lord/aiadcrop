@@ -18,7 +18,7 @@ export default function Sidebar({
 
   const links = [
     { name: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard size={20} /> },
-    { name: 'Upload', href: '/products/upload', icon: <Upload size={20} /> },
+    { name: 'Upload', href: '/upload', icon: <Upload size={20} /> },
     { name: 'Seller Studio', href: '/studio', icon: <Frame size={20} /> },
   ];
 

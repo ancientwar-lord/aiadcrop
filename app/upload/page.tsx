@@ -28,7 +28,6 @@ interface QRCode {
   tryOnUrl: string;
 }
 
-// ✅ Valid Categories List (YouCam Supported)
 const CATEGORIES = [
   { value: 'cloth_upper_body', label: 'Clothes · Upper Body (Top, Shirt, Jacket)' },
   { value: 'cloth_lower_body', label: 'Clothes · Lower Body (Jeans, Pants, Skirt)' },
@@ -121,7 +120,6 @@ export default function UploadProductPage() {
       setSuccess('Product uploaded successfully! Now generate a QR code.');
       setSelectedImagePreview(null);
       setSelectedImageName('');
-      // Form reset
       setFormData({ productName: '', category: 'cloth_auto' });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to upload product');
@@ -228,11 +226,11 @@ export default function UploadProductPage() {
       ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
 
       ctx.fillStyle = 'white';
-      ctx.font = `bold ${canvas.width * 0.04}px sans-serif`;
+      ctx.font = `bold ${canvas.width * 0.02}px sans-serif`;
       ctx.textAlign = 'right';
       ctx.shadowColor = 'rgba(0,0,0,0.5)';
       ctx.shadowBlur = 4;
-      ctx.fillText('Try this dress on you', qrX - 20, qrY + qrSize / 2);
+      ctx.fillText('Try this on you', qrX - 20, qrY + qrSize / 2);
 
       ctx.strokeStyle = '#a3e635';
       ctx.lineWidth = canvas.width * 0.008;
@@ -296,7 +294,7 @@ export default function UploadProductPage() {
         <section className="rounded-2xl border border-lime-100 bg-white p-6 shadow-sm md:p-8">
           <h2 className="mb-6 flex items-center gap-2 text-2xl font-semibold text-gray-900">
             <Upload className="h-6 w-6 text-emerald-600" />
-            Step 1 · Upload Product
+            Upload Product
           </h2>
 
           <form onSubmit={handleFileUpload} className="space-y-6">
@@ -529,7 +527,7 @@ export default function UploadProductPage() {
               <div className="absolute bottom-4 right-4 flex flex-col items-end">
                 <div className="flex items-end gap-2 mb-2">
                   <div className="text-white font-bold text-sm drop-shadow-md flex flex-col items-end">
-                    <span>Try this dress on you</span>
+                    <span>Try this on you</span>
                     <svg
                       width="24"
                       height="24"
@@ -541,7 +539,8 @@ export default function UploadProductPage() {
                       strokeLinejoin="round"
                       className="text-lime-400 mt-1"
                     >
-                      <path d="M9 5l7 7-7 7" />
+                      <path d="M3 5c7 0 10 4 10 9v1" />
+                      <path d="M9 11l4 4 4-4" />
                     </svg>
                   </div>
                 </div>

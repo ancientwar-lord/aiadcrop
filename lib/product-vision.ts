@@ -2,12 +2,24 @@ export interface ProductVisionMetadata {
   color: string;
   style: string;
   bestSkinTones: string[];
+  analysis: {
+    provider: 'pollinations';
+    model: string;
+    analyzedAt: string;
+    raw: unknown;
+  };
 }
 
 const DEFAULT_METADATA: ProductVisionMetadata = {
   color: 'Unknown',
   style: 'General',
   bestSkinTones: [],
+  analysis: {
+    provider: 'pollinations',
+    model: 'openai',
+    analyzedAt: '',
+    raw: null,
+  },
 };
 
 function normalizeMetadata(
@@ -31,6 +43,7 @@ function normalizeMetadata(
     color,
     style,
     bestSkinTones: Array.from(new Set(bestSkinTones)),
+    analysis: DEFAULT_METADATA.analysis,
   };
 }
 
@@ -58,9 +71,19 @@ export async function analyzeProductWithPollinations(params: {
   category?: string;
 }): Promise<ProductVisionMetadata> {
   const apiKey = process.env.POLLINATIONS_AI_API_KEY;
+  const analyzedAt = new Date().toISOString();
+  const model = 'openai';
 
   if (!params.imageUrl) {
-    return DEFAULT_METADATA;
+    return {
+      ...DEFAULT_METADATA,
+      analysis: {
+        provider: 'pollinations',
+        model,
+        analyzedAt,
+        raw: null,
+      },
+    };
   }
 
   try {
@@ -71,7 +94,7 @@ export async function analyzeProductWithPollinations(params: {
         ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
       },
       body: JSON.stringify({
-        model: 'openai',
+        model,
         temperature: 0,
         response_format: { type: 'json_object' },
         messages: [
@@ -100,7 +123,15 @@ export async function analyzeProductWithPollinations(params: {
     });
 
     if (!response.ok) {
-      return DEFAULT_METADATA;
+      return {
+        ...DEFAULT_METADATA,
+        analysis: {
+          provider: 'pollinations',
+          model,
+          analyzedAt,
+          raw: null,
+        },
+      };
     }
 
     const data = (await response.json()) as {
@@ -109,12 +140,38 @@ export async function analyzeProductWithPollinations(params: {
 
     const content = data.choices?.[0]?.message?.content;
     if (!content) {
-      return DEFAULT_METADATA;
+      return {
+        ...DEFAULT_METADATA,
+        analysis: {
+          provider: 'pollinations',
+          model,
+          analyzedAt,
+          raw: data,
+        },
+      };
     }
 
     const parsed = safeParseJson<ProductVisionMetadata>(content);
-    return normalizeMetadata(parsed);
+    const normalized = normalizeMetadata(parsed);
+
+    return {
+      ...normalized,
+      analysis: {
+        provider: 'pollinations',
+        model,
+        analyzedAt,
+        raw: parsed ?? content,
+      },
+    };
   } catch {
-    return DEFAULT_METADATA;
+    return {
+      ...DEFAULT_METADATA,
+      analysis: {
+        provider: 'pollinations',
+        model,
+        analyzedAt,
+        raw: null,
+      },
+    };
   }
 }

@@ -18,6 +18,7 @@ export async function initializeDatabase() {
         color VARCHAR(100) DEFAULT 'Unknown',
         style VARCHAR(100) DEFAULT 'General',
         best_skin_tones TEXT[] DEFAULT ARRAY[]::TEXT[],
+        analysis JSONB DEFAULT '{}'::JSONB,
         uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         created_by VARCHAR(255),
         CONSTRAINT fk_seller FOREIGN KEY (seller_id) REFERENCES "user"(id) ON DELETE CASCADE
@@ -32,6 +33,9 @@ export async function initializeDatabase() {
     );
     await pool.query(
       `ALTER TABLE products ADD COLUMN IF NOT EXISTS best_skin_tones TEXT[] DEFAULT ARRAY[]::TEXT[];`
+    );
+    await pool.query(
+      `ALTER TABLE products ADD COLUMN IF NOT EXISTS analysis JSONB DEFAULT '{}'::JSONB;`
     );
 
     console.log('✅ Products table created successfully');
@@ -55,6 +59,7 @@ export async function createProduct(
     color?: string;
     style?: string;
     bestSkinTones?: string[];
+    analysis?: unknown;
   }
 ) {
   try {
@@ -68,9 +73,10 @@ export async function createProduct(
          cloudinary_public_id,
          color,
          style,
-         best_skin_tones
+         best_skin_tones,
+         analysis
        )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        RETURNING *`,
       [
         id,
@@ -82,6 +88,7 @@ export async function createProduct(
         metadata?.color || 'Unknown',
         metadata?.style || 'General',
         metadata?.bestSkinTones || [],
+        metadata?.analysis || {},
       ]
     );
     return result.rows[0];

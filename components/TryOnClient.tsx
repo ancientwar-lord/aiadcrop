@@ -18,6 +18,21 @@ interface TaskStatus {
   errorMessage?: string;
 }
 
+interface SkinToneAnalysis {
+  skinColor: string;
+  detectedTones: string[];
+}
+
+interface RecommendedProduct {
+  id: string;
+  name: string;
+  category: string;
+  cloudinaryUrl: string;
+  color: string;
+  style: string;
+  bestSkinTones: string[];
+}
+
 interface ClientProps {
   product: ProductData;
 }
@@ -33,6 +48,8 @@ export default function TryOnClient({ product }: ClientProps) {
   const [userImagePreview, setUserImagePreview] = useState<string | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [pollingCount, setPollingCount] = useState(0);
+  const [skinToneAnalysis, setSkinToneAnalysis] = useState<SkinToneAnalysis | null>(null);
+  const [recommendedProducts, setRecommendedProducts] = useState<RecommendedProduct[]>([]);
 
   const needsGenderInput = ['ai_bag', 'ai_scarf', 'ai_shoes', 'ai_hat'].includes(product.category);
 
@@ -59,6 +76,8 @@ export default function TryOnClient({ product }: ClientProps) {
     if (!userImage) return;
     setIsLoading(true);
     setError(null);
+    setSkinToneAnalysis(null);
+    setRecommendedProducts([]);
 
     try {
       const initRes = await fetch('/api/tryon/upload', {
@@ -77,7 +96,7 @@ export default function TryOnClient({ product }: ClientProps) {
         throw new Error(errData.error || 'Upload init failed');
       }
 
-      const { uploadUrl, fileId, headers } = await initRes.json();
+      const { uploadUrl, fileId, headers, skinTone } = await initRes.json();
 
       const uploadRes = await fetch(uploadUrl, {
         method: 'PUT',
@@ -87,6 +106,18 @@ export default function TryOnClient({ product }: ClientProps) {
 
       if (!uploadRes.ok) throw new Error('Failed to upload image to AI server');
 
+      if (skinTone?.uploadUrl && skinTone?.headers) {
+        const skinToneUploadRes = await fetch(skinTone.uploadUrl, {
+          method: 'PUT',
+          headers: skinTone.headers,
+          body: userImage,
+        });
+
+        if (!skinToneUploadRes.ok) {
+          console.warn('Skin tone image upload failed, continuing with try-on flow');
+        }
+      }
+
       const processRes = await fetch('/api/tryon/process', {
         method: 'POST',
         headers: {
@@ -94,6 +125,7 @@ export default function TryOnClient({ product }: ClientProps) {
         },
         body: JSON.stringify({
           userFileId: fileId,
+          skinToneFileId: skinTone?.fileId,
           productImageUrl: product.cloudinaryUrl,
           productCategory: product.category,
           gender,
@@ -102,6 +134,31 @@ export default function TryOnClient({ product }: ClientProps) {
 
       const processData = await processRes.json();
       if (!processRes.ok) throw new Error(processData.error || 'Processing failed');
+
+      try {
+        const skinToneRes = await fetch('/api/tryon/skin-tone', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            skinToneFileId: skinTone?.fileId,
+            userFileId: fileId,
+          }),
+        });
+
+        const skinToneData = await skinToneRes.json();
+        if (skinToneRes.ok) {
+          setSkinToneAnalysis(skinToneData.skinToneAnalysis || null);
+          setRecommendedProducts(
+            Array.isArray(skinToneData.recommendations) ? skinToneData.recommendations : []
+          );
+        } else {
+          console.warn('Skin tone analysis failed:', skinToneData?.error || 'Unknown error');
+        }
+      } catch (skinToneError) {
+        console.warn('Skin tone recommendation request failed:', skinToneError);
+      }
 
       // Start Polling
       setStep('processing');
@@ -265,6 +322,8 @@ export default function TryOnClient({ product }: ClientProps) {
                         onClick={() => {
                           setUserImage(null);
                           setUserImagePreview(null);
+                          setSkinToneAnalysis(null);
+                          setRecommendedProducts([]);
                         }}
                         className="text-white underline"
                       >
@@ -361,12 +420,57 @@ export default function TryOnClient({ product }: ClientProps) {
                   setStep('upload');
                   setUserImage(null);
                   setUserImagePreview(null);
+                  setSkinToneAnalysis(null);
+                  setRecommendedProducts([]);
                 }}
                 className="flex-1 max-w-xs border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-100 transition"
               >
                 Try Another Photo
               </button>
             </div>
+
+            {(skinToneAnalysis || recommendedProducts.length > 0) && (
+              <div className="border-t border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Personalized recommendation
+                </h3>
+
+                {skinToneAnalysis && (
+                  <p className="text-sm text-gray-600 mb-4">
+                    Detected skin tone color:{' '}
+                    <span className="font-medium">{skinToneAnalysis.skinColor}</span>
+                    {skinToneAnalysis.detectedTones.length > 0
+                      ? ` (${skinToneAnalysis.detectedTones.join(', ')})`
+                      : ''}
+                  </p>
+                )}
+
+                {recommendedProducts.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {recommendedProducts.map((item) => (
+                      <div
+                        key={item.id}
+                        className="rounded-lg border border-gray-200 overflow-hidden bg-white"
+                      >
+                        <img
+                          src={item.cloudinaryUrl}
+                          alt={item.name}
+                          className="h-32 w-full object-cover"
+                        />
+                        <div className="p-3">
+                          <p className="text-sm font-semibold text-gray-900 line-clamp-1">
+                            {item.name}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">{item.category}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">No matching products found yet.</p>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

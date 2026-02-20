@@ -16,6 +16,7 @@ async function ensureTable() {
       color VARCHAR(100) DEFAULT 'Unknown',
       style VARCHAR(100) DEFAULT 'General',
       best_skin_tones TEXT[] DEFAULT ARRAY[]::TEXT[],
+      analysis JSONB DEFAULT '{}'::JSONB,
       uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       created_by VARCHAR(255),
       CONSTRAINT fk_seller FOREIGN KEY (seller_id) REFERENCES "user"(id) ON DELETE CASCADE
@@ -30,6 +31,9 @@ async function ensureTable() {
   );
   await pool.query(
     `ALTER TABLE products ADD COLUMN IF NOT EXISTS best_skin_tones TEXT[] DEFAULT ARRAY[]::TEXT[];`
+  );
+  await pool.query(
+    `ALTER TABLE products ADD COLUMN IF NOT EXISTS analysis JSONB DEFAULT '{}'::JSONB;`
   );
 }
 
@@ -113,6 +117,7 @@ export async function POST(request: NextRequest) {
           color: savedProduct.color,
           style: savedProduct.style,
           bestSkinTones: savedProduct.best_skin_tones || [],
+          analysis: savedProduct.analysis || {},
           uploadedAt: savedProduct.uploaded_at,
         },
       },

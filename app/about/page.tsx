@@ -43,14 +43,14 @@ export default function AboutPage() {
           <AboutCard
             index="04"
             title="Product Recommendation Engine"
-            description="We analyze user skin tone and body type during the QR-Try experience to recommend the best product variants and color options from your listings for a perfect match."
+            description="We analyze user skin tone and thier style during the QR-Try experience to recommend the best product variants and color options from your listings for a perfect match."
             icon={<Rocket size={24} />}
           />
         </div>
 
         <div className="mt-24 p-12 rounded-[3rem] bg-white/[0.02] border border-white/5 text-center backdrop-blur-sm">
           <h3 className="text-3xl font-black text-white mb-4 italic uppercase">
-            Go Grobal Without an Ad Budget
+            Go Global Without an Ad Budget
           </h3>
           <p className="text-slate-500 mb-8 max-w-2xl mx-auto font-medium">
             Ready to let your customers do the marketing for you? Join our platform to turn your

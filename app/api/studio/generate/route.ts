@@ -89,7 +89,10 @@ export async function POST(request: NextRequest) {
     console.log('[Studio] Task response:', taskResponse.status, taskResponseText);
 
     if (!taskResponse.ok) {
-      return NextResponse.json({ error: `Task creation failed: ${taskResponseText}` }, { status: 500 });
+      return NextResponse.json(
+        { error: `Task creation failed: ${taskResponseText}` },
+        { status: 500 }
+      );
     }
 
     let taskData;

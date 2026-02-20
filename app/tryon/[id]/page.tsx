@@ -37,7 +37,6 @@ interface PageProps {
 }
 
 export default async function TryOnPage({ params }: PageProps) {
-  // 1. Data Fetching on Server (Fast & SEO Friendly)
   const resolvedParams = await params;
   const productId = resolvedParams.id;
   const product = await getProduct(productId);
