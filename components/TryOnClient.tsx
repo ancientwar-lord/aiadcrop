@@ -326,19 +326,15 @@ export default function TryOnClient({ product }: ClientProps) {
 
   // --- UI RENDER ---
   return (
-    <div className="min-h-screen bg-linear-to-br from-purple-50 to-pink-100 p-4 md:p-8">
+    <div className="min-h-screen bg-linear-to-br from-purple-50 to-pink-100 p-4 md:p-8 md:pt-2">
       <div className="max-w-6xl mx-auto">
-        <Link
-          href="/products"
-          className="inline-flex items-center text-gray-600 hover:text-purple-600 mb-6 transition"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back to Products
-        </Link>
-
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-          Try On: {product.name}
+          Welcome to the digital trial room!
         </h1>
-        <p className="text-gray-600 mb-8">See how this looks on you instantly with AI.</p>
+        <p className="text-gray-600 mb-8">
+          See how this <span className="font-semibold">{product.name}</span> looks on you instantly
+          with AI.
+        </p>
 
         {error && (
           <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded mb-6 animate-pulse">
@@ -347,7 +343,6 @@ export default function TryOnClient({ product }: ClientProps) {
           </div>
         )}
 
-        {/* STEP 1: Upload UI */}
         {step === 'upload' && (
           <div className="bg-white rounded-xl shadow-xl overflow-hidden">
             <div className="grid grid-cols-1 md:grid-cols-2">
@@ -361,9 +356,6 @@ export default function TryOnClient({ product }: ClientProps) {
                   />
                 </div>
                 <h2 className="mt-4 text-xl font-bold text-gray-800">{product.name}</h2>
-                <span className="inline-block mt-2 px-3 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full uppercase tracking-wide">
-                  {product.category}
-                </span>
               </div>
 
               {/* Right: Upload Area */}

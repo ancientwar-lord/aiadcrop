@@ -254,20 +254,6 @@ export default function UploadProductPage() {
   return (
     <div className="min-h-screen  px-4 py-8 md:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl space-y-8">
-        <header className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm backdrop-blur md:p-8">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-lime-100 px-3 py-1 text-sm font-medium text-emerald-800">
-            <Sparkles className="h-4 w-4" />
-            Seller Studio
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 md:text-4xl">
-            Upload product and generate try-on QR
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-gray-600 md:text-base">
-            Add your product image once, generate a QR instantly, and share the experience with
-            customers in store or online.
-          </p>
-        </header>
-
         {error && (
           <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
@@ -284,12 +270,18 @@ export default function UploadProductPage() {
 
         {!product ? (
           <section className="rounded-2xl border border-lime-100 bg-white p-6 shadow-sm md:p-8">
-            <h2 className="mb-6 flex items-center gap-2 text-2xl font-semibold text-gray-900">
-              <Upload className="h-6 w-6 text-emerald-600" />
-              Upload Product
-            </h2>
+            <div className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm backdrop-blur md:p-8 ">
+              <div className=" flex text-3xl font-bold tracking-tight text-gray-900 md:text-4xl gap-2">
+                <Upload className="h-8 w-8 mt-2  text-emerald-600" />{' '}
+                <h1>Upload product and generate try-on QR</h1>
+              </div>
+              <p className="mt-2 max-w-2xl text-sm text-gray-600 md:text-base">
+                Add your product image once, generate a QR instantly, and share the experience with
+                customers in store or online.
+              </p>
+            </div>
 
-            <form onSubmit={handleFileUpload} className="space-y-6">
+            <form onSubmit={handleFileUpload} className="space-y-6 mt-8">
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700">Product Name</label>

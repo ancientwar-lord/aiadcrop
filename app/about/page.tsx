@@ -25,7 +25,7 @@ export default function AboutPage() {
           <AboutCard
             index="01"
             title="Impactful AI Ads"
-            description="Our ad engine transforms any product image into a high-retention video ad. No expensive cameras or crews—just pure AI power optimized for social media. We apply psychological impact research to every generation, tailoring content to the specific product and target audience to ensure higher click-through rates than traditional advertising."
+            description="Our platform transforms any product image into a high-retention AI advertisement. Forget expensive cameras and crews—this is pure AI power optimized for social media. By leveraging the next-generation PerfectCrop API, we craft the ideal ad for your product, guaranteed to drive higher click-through rates than traditional advertising."
             icon={<Zap size={24} fill="currentColor" />}
           />
           <AboutCard
@@ -37,13 +37,13 @@ export default function AboutPage() {
           <AboutCard
             index="03"
             title="Viral Marketing"
-            description="Users generate their own 'AI Try-On' videos to share on social media. Every shared video includes a QR overlay, creating a viral loop that brings new customers directly back to your product page."
+            description="Users generate their own 'AI Try-On' images and if they share it on social media. Every shared image includes a QR overlay, creating a viral loop that brings new customers directly back to your product page."
             icon={<Share2 size={24} />}
           />
           <AboutCard
             index="04"
             title="Product Recommendation Engine"
-            description="We analyze user skin tone and thier style during the QR-Try experience to recommend the best product variants and color options from your listings for a perfect match."
+            description="We analyze user skin tone and their style preferences during the QR-Try experience to recommend the best product from your listings for a perfect match."
             icon={<Rocket size={24} />}
           />
         </div>

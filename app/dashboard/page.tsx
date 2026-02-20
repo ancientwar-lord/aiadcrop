@@ -314,19 +314,6 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen px-4 py-8 md:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-8">
-        <header className="rounded-2xl border border-white/70 bg-white/80 p-6 shadow-sm backdrop-blur md:p-8">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-lime-100 px-3 py-1 text-sm font-medium text-emerald-800">
-            <Zap className="h-4 w-4" />
-            Dashboard
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 md:text-4xl">
-            Your Products
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-gray-600 md:text-base">
-            Manage your uploaded products and generate try-on QR codes.
-          </p>
-        </header>
-
         {error && (
           <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
@@ -348,9 +335,18 @@ export default function DashboardPage() {
         )}
 
         <section className="rounded-2xl border border-lime-100 bg-white p-6 shadow-sm md:p-8">
-          <h2 className="mb-6 flex items-center gap-2 text-2xl font-semibold text-gray-900">
-            Products ({products.length})
-          </h2>
+          <div className="rounded-2xl border border-white/70 bg-white/80 shadow-sm backdrop-blur">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-lime-100 px-3 py-1 text-sm font-medium text-emerald-800">
+              <Zap className="h-4 w-4" />
+              Dashboard
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 md:text-4xl">
+              Your Products ({products.length})
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm text-gray-600 md:text-base">
+              Manage your uploaded products and generate try-on QR codes.
+            </p>
+          </div>
 
           {isLoadingProducts ? (
             <div className="flex items-center justify-center py-12">
